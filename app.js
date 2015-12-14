@@ -11,25 +11,26 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
   console.log('connected')
+  console.log(socket)
   socket.on('disconnect', () => {
     console.log('disconnected')
   })
 
-  socket.on(`createUser`, (username) => {
+  socket.on(`createUser`, ({ username }) => {
     users.push(username)
     socket.broadcast.emit({ users })
   })
 
-  socket.on(`createRoom`, (roomname) => {
+  socket.on(`createRoom`, ({ roomname }) => {
     rooms.push(roomname)
     socket.broadcast.emit({ rooms })
   })
 
-  socket.on(`joinRoom`, (roomname) => {
+  socket.on(`joinRoom`, ({ roomname }) => {
     socket.broadcast.emit({ rooms })
   })
 })
 
-http.listen(8000, () => {
+http.listen(8090, () => {
   console.log('works')
 })
