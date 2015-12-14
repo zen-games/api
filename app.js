@@ -2,7 +2,6 @@ var app = require('express')()
 var http = require('http').Server(app)
 var io = require('socket.io')(http)
 
-var user = ''
 var room = {}
 
 var users = []
@@ -19,7 +18,6 @@ io.on('connection', (socket) => {
   })
 
   socket.on(`createUser`, (username) => {
-    user = username
     users.push(username)
     socket.broadcast.emit({ users })
   })
