@@ -2,8 +2,6 @@ var app = require('express')()
 var http = require('http').Server(app)
 var io = require('socket.io')(http)
 
-var room = {}
-
 var users = []
 var rooms = []
 
@@ -23,13 +21,11 @@ io.on('connection', (socket) => {
   })
 
   socket.on(`createRoom`, (roomname) => {
-    room = roomname
     rooms.push(roomname)
     socket.broadcast.emit({ rooms })
   })
 
   socket.on(`joinRoom`, (roomname) => {
-    room = roomname
     socket.broadcast.emit({ rooms })
   })
 })
