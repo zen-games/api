@@ -2,17 +2,21 @@ var app = require('express')()
 var http = require('http').Server(app)
 var io = require('socket.io')(http)
 
-app.get('/', function (req, res) {
+app.get('/', (req, res) => {
   res.sendfile('test.html')
 })
 
-io.on('connection', function (socket) {
-  console.log('connected')
-  socket.on('disconnet', function () {
+io.on('connection', (socket) => {
+  console.log('connectedddd')
+  socket.on('disconnet', () => {
     console.log('disconnected')
   })
+
+  socket.on(`yoo`, () =>
+    socket.broadcast.emit(`yo`, { message: `yo` })
+  )
 })
 
-http.listen(80, function(){
+http.listen(8000, () => {
   console.log('works')
 })
