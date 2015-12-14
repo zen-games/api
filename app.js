@@ -3,7 +3,7 @@ var http = require('http').Server(app)
 var io = require('socket.io')(http)
 
 var user = ''
-var room = ''
+var room = {}
 
 var users = []
 var rooms = []
@@ -18,11 +18,11 @@ io.on('connection', (socket) => {
     console.log('disconnected')
   })
 
-  socket.on(`createUser`, (username) =>
+  socket.on(`createUser`, (username) => {
     user = username
     users.push(username)
     socket.broadcast.emit({ users })
-  )
+  })
 
   socket.on(`createRoom`, (roomname) => {
     room = roomname
@@ -31,7 +31,8 @@ io.on('connection', (socket) => {
   })
 
   socket.on(`joinRoom`, (roomname) => {
-    // 
+    room = roomname
+    socket.broadcast.emit({ rooms })
   })
 })
 
