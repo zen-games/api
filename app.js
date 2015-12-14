@@ -16,18 +16,18 @@ io.on('connection', (socket) => {
     console.log('disconnected')
   })
 
-  socket.on(`createUser`, ({ username }) => {
+  socket.on(`createUser`, (username) => {
     users.push(username)
-    socket.broadcast.emit({ users })
+    socket.broadcast.emit('userCreated', { users })
   })
 
-  socket.on(`createRoom`, ({ roomname }) => {
+  socket.on(`createRoom`, (roomname) => {
     rooms.push(roomname)
-    socket.broadcast.emit({ rooms })
+    socket.broadcast.emit('roomCreated', { rooms })
   })
 
-  socket.on(`joinRoom`, ({ roomname }) => {
-    socket.broadcast.emit({ rooms })
+  socket.on(`joinRoom`, (roomname) => {
+    socket.broadcast.emit('roomJoined', { rooms })
   })
 })
 
