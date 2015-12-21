@@ -68,6 +68,15 @@ io.on(`connection`, (socket) => {
       `${username} has logged out. Number of rooms: ${rooms.length}`
     ))
   })
+
+  socket.on(`ui:sendMessage`, ({ room }) => {
+    rooms = [
+      ...rooms.filter(x => x.id !== room.id),
+      room
+    ]
+
+    socket.emit(`api:sendMessage`, { rooms })
+  })
 })
 
 http.listen(8000, () => {
