@@ -1,38 +1,48 @@
 require(`babel-core/register`)
 
-var app = require('express')()
-var http = require('http').Server(app)
-var io = require('socket.io')(http)
+let app = require('express')()
+let http = require('http').Server(app)
+let io = require('socket.io')(http)
 
-var users = []
-var rooms = []
-
-app.get(`/`, (req, res) => {
-  res.sendfile(`test.html`  )
-})
+let rooms = []
 
 io.on(`connection`, (socket) => {
-  console.log(`connected`)
+  console.log(`New connection!`)
   socket.on(`disconnect`, () => {
-    console.log(`disconnected`)
+    console.log(`User disconnected.`)
   })
 
-  socket.on(`createUser`, (username) => {
-    users.push(username)
-    console.log(username)
-    socket.broadcast.emit(`userCreated`, { users })
-  })
-
-  socket.on(`createRoom`, ({ room }) => {
+  socket.on(`ui:createRoom`, ({ room }) => {
     rooms = [ ...rooms, room ]
-    socket.broadcast.emit(`roomCreated`, { rooms })
+    socket.broadcast.emit(`api:createRoom`, { room })
   })
 
-  socket.on(`joinRoom`, (roomname) => {
-    socket.broadcast.emit(`roomJoine`, { rooms })
+  socket.on(`ui:joinRoom`, (roomname) => {
+    socket.broadcast.emit(`api:joinRoom`, { rooms })
+  })
+
+  socket.on(`ui:leaveRoom`, ({ id, username }) => {
+    let room = rooms.filter(x => x.id === id)[0]
+    room.users = room.users.filter(x => x !== username)
+
+    if (room.owner === username) {
+      room.owner = null
+    }
+
+    rooms = [
+      ...rooms.filter(x => x.id !== id),
+      room
+    ].filter(x => x.users.length)
+
+
+    io.emit(`api:leaveRoom`, { rooms })
+  })
+
+  socket.on(`ui:logout`, ({ username }) => {
+    //TODO: remove username from all rooms
   })
 })
 
 http.listen(8000, () => {
-  console.log(`works`)
+  console.log(`listening on localhost:8000`)
 })
