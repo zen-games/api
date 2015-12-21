@@ -5,32 +5,32 @@ var io = require('socket.io')(http)
 var users = []
 var rooms = []
 
-app.get('/', (req, res) => {
-  res.sendfile('test.html')
+app.get(`/`, (req, res) => {
+  res.sendfile(`test.html`  )
 })
 
-io.on('connection', (socket) => {
-  console.log('connected')
-  console.log(socket)
-  socket.on('disconnect', () => {
-    console.log('disconnected')
+io.on(`connection`, (socket) => {
+  console.log(`connected`)
+  socket.on(`disconnect`, () => {
+    console.log(`disconnected`)
   })
 
   socket.on(`createUser`, (username) => {
     users.push(username)
-    socket.broadcast.emit('userCreated', { users })
+    console.log(username)
+    socket.broadcast.emit(`userCreated`, { users })
   })
 
   socket.on(`createRoom`, (roomname) => {
     rooms.push(roomname)
-    socket.broadcast.emit('roomCreated', { rooms })
+    socket.broadcast.emit(`roomCreated`, { rooms })
   })
 
   socket.on(`joinRoom`, (roomname) => {
-    socket.broadcast.emit('roomJoined', { rooms })
+    socket.broadcast.emit(`roomJoine`, { rooms })
   })
 })
 
-http.listen(8090, () => {
-  console.log('works')
+http.listen(8000, () => {
+  console.log(`works`)
 })
