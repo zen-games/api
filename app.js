@@ -1,3 +1,5 @@
+require(`babel-core/register`)
+
 var app = require('express')()
 var http = require('http').Server(app)
 var io = require('socket.io')(http)
@@ -21,8 +23,8 @@ io.on(`connection`, (socket) => {
     socket.broadcast.emit(`userCreated`, { users })
   })
 
-  socket.on(`createRoom`, (roomname) => {
-    rooms.push(roomname)
+  socket.on(`createRoom`, ({ room }) => {
+    rooms = [ ...rooms, room ]
     socket.broadcast.emit(`roomCreated`, { rooms })
   })
 
