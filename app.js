@@ -136,7 +136,18 @@ io.on(`connection`, (socket) => {
     ))
   })
 
-  socket.on(`ui:sendMessage`, ({ room }) => {
+  socket.on(`ui:sendMessage`, ({ id, message, username }) => {
+    let room = rooms.filter(x => x.id === id)[0]
+
+    room.messages = [
+      ...room.messages,
+      {
+        username,
+        message,
+        time: +new Date()
+      }
+    ]
+
     rooms = [
       ...rooms.filter(x => x.id !== room.id),
       room
