@@ -1,29 +1,65 @@
 require(`babel-core/register`)
 
-let app = require('express')()
-let http = require('http').Server(app)
-let io = require('socket.io')(http)
-let chalk = require('chalk')
+let app = require(`express`)()
+let http = require(`http`).Server(app)
+let io = require(`socket.io`)(http)
+let chalk = require(`chalk`)
+let Sentencer = require(`sentencer`)
 
 let rooms = []
+let users = []
 
 io.on(`connection`, (socket) => {
-  console.log(chalk.yellow(`⚡ New connection!`))
+  users = [
+    ...users,
+    {
+      id: socket.id
+    }
+  ]
+
+  console.log(chalk.yellow(
+    `⚡ New connection!`
+  ))
 
   socket.on(`disconnect`, () => {
-    console.log(chalk.red(`⌧ User disconnected.`))
-  })
+    let { username } = users.filter(x => x.id === socket.id)[0]
 
-  socket.on(`ui:createRoom`, ({ room }) => {
-    rooms = [
-      ...rooms,
-      room
+    if (username) {
+      rooms.forEach(
+        x => x.users = x.users.filter(x => x !== username)
+      )
+
+      rooms = rooms.filter(x => x.users.length)
+    }
+
+    users = [
+      ...users.filter(x => x.id !== socket.id)
     ]
 
-    socket.broadcast.emit(`api:createRoom`, { room })
+    console.log(chalk.red(
+      `⌧ User disconnected. Number of users: ${users.length}. `
+    + `Number of rooms: ${rooms.length}`
+    ))
+  })
+
+  socket.on(`ui:createRoom`, ({ username }) => {
+    let id = Sentencer.make(`{{adjective}}-{{noun}}`)
+
+    rooms = [
+      ...rooms,
+      {
+        id,
+        owner: username,
+        users: [ username ],
+        messages: []
+      }
+    ]
+
+    socket.emit(`api:createRoom`, { id })
+    io.emit(`api:updateRooms`, { rooms })
 
     console.log(chalk.cyan(
-      `New room was created with id ${room.id}. Number of rooms: ${rooms.length}`
+      `New room was created with id ${id}. Number of rooms: ${rooms.length}`
     ))
   })
 
@@ -73,11 +109,19 @@ io.on(`connection`, (socket) => {
   })
 
   socket.on(`ui:createUser`, ({ username }) => {
+    users = [
+      ...users.filter(x => x.id !== socket.id),
+      {
+        id: socket.id,
+        username
+      }
+    ]
+
     socket.emit(`api:updateRooms`, ({ rooms }))
 
-    console.log(
-      chalk.cyan(`New user, ${username}, has logged in.`)
-    )
+    console.log(chalk.cyan(
+      `New user, ${username}, has logged in. Number of users: ${users.length}`
+    ))
   })
 
   socket.on(`ui:logout`, ({ username }) => {

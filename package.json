@@ -20,6 +20,7 @@
   "dependencies": {
     "chalk": "^1.1.1",
     "express": "^4.13.3",
+    "sentencer": "git+https://github.com/alex-wilmer/Sentencer.git#fix/module-path",
     "socket.io": "^1.3.7"
   },
   "devDependencies": {
