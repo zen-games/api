@@ -15,7 +15,11 @@ io.on(`connection`, (socket) => {
   })
 
   socket.on(`ui:createRoom`, ({ room }) => {
-    rooms = [ ...rooms, room ]
+    rooms = [
+      ...rooms,
+      room
+    ]
+
     socket.broadcast.emit(`api:createRoom`, { room })
 
     console.log(chalk.cyan(
@@ -24,8 +28,21 @@ io.on(`connection`, (socket) => {
   })
 
   socket.on(`ui:joinRoom`, ({ id, username }) => {
-    socket.broadcast.emit(`api:joinRoom`, { rooms })
-    console.log(chalk.cyan(
+    let room = rooms.filter(x => x.id === id)[0]
+
+    room.users = [
+      ...room.users,
+      username
+    ]
+
+    rooms = [
+      ...rooms.filter(x => x.id !== id),
+      room
+    ]
+
+    io.emit(`api:updateRooms`, { rooms })
+
+    console.log(chalk.green(
       `${username} has joined room ${id}.`
     ))
   })
@@ -47,7 +64,7 @@ io.on(`connection`, (socket) => {
 
       rooms = rooms.filter(x => x.users.length)
 
-      io.emit(`api:leaveRoom`, { rooms })
+      io.emit(`api:updateRooms`, { rooms })
 
       console.log(chalk.magenta(
         `${username} has left room ${id}. Number of rooms: ${rooms.length}`
@@ -56,12 +73,18 @@ io.on(`connection`, (socket) => {
   })
 
   socket.on(`ui:createUser`, ({ username }) => {
-    socket.emit(`api:createUser`, ({ rooms }))
-    console.log(chalk.cyan(`New user, ${username}, has logged in.`))
+    socket.emit(`api:updateRooms`, ({ rooms }))
+
+    console.log(
+      chalk.cyan(`New user, ${username}, has logged in.`)
+    )
   })
 
   socket.on(`ui:logout`, ({ username }) => {
-    rooms.forEach(x => x.users = x.users.filter(x => x !== username))
+    rooms.forEach(
+      x => x.users = x.users.filter(x => x !== username)
+    )
+
     rooms = rooms.filter(x => x.users.length)
 
     console.log(chalk.magenta(
@@ -75,7 +98,7 @@ io.on(`connection`, (socket) => {
       room
     ]
 
-    socket.emit(`api:sendMessage`, { rooms })
+    io.emit(`api:updateRooms`, { rooms })
   })
 })
 
