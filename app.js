@@ -155,6 +155,23 @@ io.on(`connection`, (socket) => {
 
     io.emit(`api:updateRooms`, { rooms })
   })
+
+  socket.on(`ui:setGame`, ({ game, id }) => {
+    let room = rooms.filter(x => x.id === id)[0]
+
+    room.game = game
+
+    rooms = [
+      ...rooms.filter(x => x.id !== id),
+      room
+    ]
+
+    io.emit(`api:updateRooms`, { rooms })
+
+    console.log(chalk.white(
+      `Room ${id} is now playing ${game}.`
+    ))
+  })
 })
 
 http.listen(8000, () => {
