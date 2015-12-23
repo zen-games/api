@@ -159,7 +159,12 @@ io.on(`connection`, (socket) => {
   socket.on(`ui:setGame`, ({ game, id }) => {
     let room = rooms.filter(x => x.id === id)[0]
 
-    room.game = game
+    room.game = {
+      name: game,
+      started: false,
+      gameOver: false,
+      turn: null
+    }
 
     rooms = [
       ...rooms.filter(x => x.id !== id),
@@ -170,6 +175,32 @@ io.on(`connection`, (socket) => {
 
     console.log(chalk.white(
       `Room ${id} is now playing ${game}.`
+    ))
+  })
+
+  socket.on(`ui:startGame`, ({ id, username }) => {
+    let room = rooms.filter(x => x.id === id)[0]
+
+    // needs stage-0
+
+    // room.game = {
+    //   ...room.game,
+    //   started: true,
+    //   turn: username
+    // }
+
+    room.game.started = true
+    room.game.turn = username
+
+    rooms = [
+      ...rooms.filter(x => x.id !== id),
+      room
+    ]
+
+    io.emit(`api:updateRooms`, { rooms })
+
+    console.log(chalk.green(
+      `${room.game.name} in ${room.id} has started!`
     ))
   })
 })
