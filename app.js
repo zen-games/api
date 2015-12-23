@@ -6,6 +6,17 @@ let io = require(`socket.io`)(http)
 let chalk = require(`chalk`)
 let Sentencer = require(`sentencer`)
 
+// Chalk Colors
+
+let CONNECT = `yellow`
+let DISCONNECT = `red`
+let LEAVE = `magenta`
+let CREATE = `cyan`
+let JOIN = `green`
+let UPDATE = `white`
+
+// "Database"
+
 let rooms = []
 let users = []
 
@@ -17,7 +28,7 @@ io.on(`connection`, (socket) => {
     }
   ]
 
-  console.log(chalk.yellow(
+  console.log(chalk[CONNECT](
     `⚡ New connection!`
   ))
 
@@ -36,7 +47,7 @@ io.on(`connection`, (socket) => {
       ...users.filter(x => x.id !== socket.id)
     ]
 
-    console.log(chalk.red(
+    console.log(chalk[DISCONNECT](
       `⌧ User disconnected. Number of users: ${users.length}. `
     + `Number of rooms: ${rooms.length}`
     ))
@@ -58,7 +69,7 @@ io.on(`connection`, (socket) => {
     socket.emit(`api:createRoom`, { id })
     io.emit(`api:updateRooms`, { rooms })
 
-    console.log(chalk.cyan(
+    console.log(chalk[CREATE](
       `New room was created with id ${id}. Number of rooms: ${rooms.length}`
     ))
   })
@@ -78,7 +89,7 @@ io.on(`connection`, (socket) => {
 
     io.emit(`api:updateRooms`, { rooms })
 
-    console.log(chalk.green(
+    console.log(chalk[JOIN](
       `${username} has joined room ${id}.`
     ))
   })
@@ -102,7 +113,7 @@ io.on(`connection`, (socket) => {
 
       io.emit(`api:updateRooms`, { rooms })
 
-      console.log(chalk.magenta(
+      console.log(chalk[LEAVE](
         `${username} has left room ${id}. Number of rooms: ${rooms.length}`
       ))
     }
@@ -119,7 +130,7 @@ io.on(`connection`, (socket) => {
 
     socket.emit(`api:updateRooms`, ({ rooms }))
 
-    console.log(chalk.cyan(
+    console.log(chalk[CREATE](
       `New user, ${username}, has logged in. Number of users: ${users.length}`
     ))
   })
@@ -131,7 +142,7 @@ io.on(`connection`, (socket) => {
 
     rooms = rooms.filter(x => x.users.length)
 
-    console.log(chalk.magenta(
+    console.log(chalk[LOGOUT](
       `${username} has logged out. Number of rooms: ${rooms.length}`
     ))
   })
@@ -173,7 +184,7 @@ io.on(`connection`, (socket) => {
 
     io.emit(`api:updateRooms`, { rooms })
 
-    console.log(chalk.white(
+    console.log(chalk[UPDATE](
       `Room ${id} is now playing ${game}.`
     ))
   })
@@ -199,12 +210,12 @@ io.on(`connection`, (socket) => {
 
     io.emit(`api:updateRooms`, { rooms })
 
-    console.log(chalk.green(
+    console.log(chalk[UPDATE](
       `${room.game.name} in ${room.id} has started!`
     ))
   })
 })
 
 http.listen(8000, () => {
-  console.log(chalk.white(`☆ listening on localhost:8000`))
+  console.log(chalk[UPDATE](`☆ listening on localhost:8000`))
 })
