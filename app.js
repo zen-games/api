@@ -6,18 +6,18 @@ let io = require(`socket.io`)(http)
 let chalk = require(`chalk`)
 let Sentencer = require(`sentencer`)
 let mongoose = require(`mongoose`)
-let routes = require(`express-routes`)
 let jwt = require(`jsonwebtoken`)
 let User = require (`./db/user`)
 let db = require (`./db/config`)
-let router = app.Router()
 
 let rooms = []
 let users = []
 
+app.set(`secret`, `keyboardcat`);
+
 var testUser = new User({
-  username: dongler,
-  password: Password
+  username: `dongler`,
+  password: `Password`
 })
 
 User.findOne({ username: `dongler` }, (err, user) => {
@@ -25,17 +25,24 @@ User.findOne({ username: `dongler` }, (err, user) => {
   // test a matching password
   user.comparePassword(`Password123`, (err, isMatch) => {
       if (err) throw err
-      console.log(`Password123:`, isMatch); // > Password123: true
+      console.log(`Password123:`, isMatch) // > Password123: true
   })
   // test a failing password
-  user.comparePassword(`123Password`, function(err, isMatch) {
-      if (err) throw err;
-      console.log(`123Password:`, isMatch); // > 123Password: false
-  });
-});
+  user.comparePassword(`123Password`, (err, isMatch) => {
+      if (err) throw err
+      console.log(`123Password:`, isMatch) // > 123Password: false
+  })
+})
 
-router.post(`/auth`, (req, res) => {
-
+app.get('/auth', (req, res) => {
+  var token = jwt.sign(user, app.get('secret'), {
+    expiresInMinutes: 1440 // expires in 24 hours
+  })
+  res.json({
+    success: true,
+    message: `Enjoy your token!`,
+    token: token
+  })
 })
 
 io.on(`connection`, (socket) => {

@@ -1,14 +1,14 @@
 let mongoose = require(`mongoose`)
 let Schema = mongoose.Schema
-let bcrypt = require(bcrypt)
+let bcrypt = require(`bcrypt`)
 let SALT_WORK_FACTOR = 10
 
 let UserSchema = new Schema({
-    username: { type: String, required: true, index: { unique: true } },
-    password: { type: String, required: true }
+  username: { type: String, required: true, index: { unique: true } },
+  password: { type: String, required: true }
 })
 
-UserSchema.pre(save, next => {
+UserSchema.pre(`save`, next => {
   let user = this
   // only hash the password if it has been modified (or is new)
   if (!user.isModified(`password`)) return next()
@@ -17,10 +17,10 @@ UserSchema.pre(save, next => {
     if (err) return next(err)
     // hash the password using our new salt
     bcrypt.hash(user.password, salt, (err, hash) => {
-        if (err) return next(err)
-        // override the cleartext password with the hashed one
-        user.password = hash
-        next()
+      if (err) return next(err)
+      // override the cleartext password with the hashed one
+      user.password = hash
+      next()
     })
   })
 })
@@ -32,4 +32,4 @@ UserSchema.methods.comparePassword = (candidatePassword, cb) => {
   })
 }
 
-module.exports = mongoose.model(User, UserSchema)
+module.exports = mongoose.model(`User`, UserSchema)
