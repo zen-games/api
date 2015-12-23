@@ -109,19 +109,25 @@ io.on(`connection`, (socket) => {
   })
 
   socket.on(`ui:createUser`, ({ username }) => {
-    users = [
-      ...users.filter(x => x.id !== socket.id),
-      {
-        id: socket.id,
-        username
-      }
-    ]
+    if (users.some(x => x.username === username)) {
+      socket.emit(`api:userExists`)
+    }
+    else {
+      users = [
+        ...users.filter(x => x.id !== socket.id),
+        {
+          id: socket.id,
+          username
+        }
+      ]
 
-    socket.emit(`api:updateRooms`, ({ rooms }))
+      socket.emit(`api:login`)
+      socket.emit(`api:updateRooms`, ({ rooms }))
 
-    console.log(chalk.cyan(
-      `New user, ${username}, has logged in. Number of users: ${users.length}`
-    ))
+      console.log(chalk.cyan(
+        `New user, ${username}, has logged in. Number of users: ${users.length}`
+      ))
+    }
   })
 
   socket.on(`ui:logout`, ({ username }) => {
