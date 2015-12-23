@@ -5,6 +5,7 @@ let http = require(`http`).Server(app)
 let io = require(`socket.io`)(http)
 let chalk = require(`chalk`)
 let Sentencer = require(`sentencer`)
+let bodyParser = require(`body-parser`)
 let mongoose = require(`mongoose`)
 let jwt = require(`jsonwebtoken`)
 let User = require (`./db/user`)
@@ -20,17 +21,11 @@ var testUser = new User({
   password: `Password`
 })
 
-User.findOne({ username: `dongler` }, (err, user) => {
+User.findOne({ username: req.body.username }, (err, user) => {
   if (err) throw err
-  // test a matching password
-  user.comparePassword(`Password123`, (err, isMatch) => {
+  user.comparePassword(req.body.password, (err, isMatch) => {
       if (err) throw err
-      console.log(`Password123:`, isMatch) // > Password123: true
-  })
-  // test a failing password
-  user.comparePassword(`123Password`, (err, isMatch) => {
-      if (err) throw err
-      console.log(`123Password:`, isMatch) // > 123Password: false
+      console.log(`password: ${req.body.password} result: ${isMatch}`)
   })
 })
 
