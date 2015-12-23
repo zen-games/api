@@ -137,6 +137,8 @@ io.on(`connection`, (socket) => {
 
     rooms = rooms.filter(x => x.users.length)
 
+    socket.broadcast.emit(`api:updateRooms`, { rooms })
+
     console.log(chalk.magenta(
       `${username} has logged out. Number of rooms: ${rooms.length}`
     ))
