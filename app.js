@@ -26,7 +26,7 @@ io.on(`connection`, (socket) => {
 
     if (username) {
       rooms.forEach(
-        x => x.users = x.users.filter(x => x !== username)
+        x => x.users = x.users.filter(x => x.username !== username)
       )
 
       rooms = rooms.filter(x => x.users.length)
@@ -87,7 +87,7 @@ io.on(`connection`, (socket) => {
     let room = rooms.filter(x => x.id === id)[0]
 
     if (room) {
-      room.users = room.users.filter(x => x !== username)
+      room.users = room.users.filter(x => x.username !== username)
 
       if (room.owner === username) {
         room.owner = null
@@ -132,7 +132,7 @@ io.on(`connection`, (socket) => {
 
   socket.on(`ui:logout`, ({ username }) => {
     rooms.forEach(
-      x => x.users = x.users.filter(x => x !== username)
+      x => x.users = x.users.filter(x => x.username !== username)
     )
 
     rooms = rooms.filter(x => x.users.length)
@@ -197,11 +197,12 @@ io.on(`connection`, (socket) => {
       user
     ]
 
-    console.log(room.users.filter(x => x.ready))
-    console.log(room.game)
-
     if (room.users.filter(x => x.ready).length === room.game.players) {
       room.game.started = true
+      
+      console.log(chalk.green(
+        `${room.game.name} in ${room.id} has started!`
+      ))
     }
 
     rooms = [
@@ -210,10 +211,6 @@ io.on(`connection`, (socket) => {
     ]
 
     io.emit(`api:updateRooms`, { rooms })
-
-    console.log(chalk.green(
-      `${room.game.name} in ${room.id} has started!`
-    ))
   })
 })
 
