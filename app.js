@@ -150,9 +150,9 @@ io.on(`connection`, (socket) => {
     room.messages = [
       ...room.messages,
       {
-        username,
         message,
-        time: +new Date()
+        time: +new Date(),
+        username
       }
     ]
 
@@ -199,11 +199,60 @@ io.on(`connection`, (socket) => {
 
     if (room.users.filter(x => x.ready).length === room.game.players) {
       room.game.started = true
-      
+
+      room.game.turn =
+        room.users[
+          Math.floor(Math.random() * 2)
+        ].username
+
+      room.messages = [
+        ...room.messages,
+        {
+          id: room.id,
+          message: `The game has started!`,
+          time: +new Date(),
+          username: `zen-games`,
+        }
+      ]
+
       console.log(chalk.green(
         `${room.game.name} in ${room.id} has started!`
       ))
     }
+
+    rooms = [
+      ...rooms.filter(x => x.id !== id),
+      room
+    ]
+
+    io.emit(`api:updateRooms`, { rooms })
+  })
+
+  socket.on(`ui:makeMove`, ({ id, x, y }) => {
+    // add move to board / make calculations
+
+    let room = rooms.filter(x => x.id === id)[0]
+    let { game } = room
+
+    game.state = [
+      ...game.state,
+      game.state[game.state.length -1].map((row, i) => {
+        if (i === x) {
+          return row.map((cell, i) => {
+            if (i === y) {
+              // needs to be -1 or based on turn
+              return 1
+            } else {
+              return cell
+            }
+          })
+        } else {
+          return row
+        }
+      })
+    ]
+
+    room.game = game
 
     rooms = [
       ...rooms.filter(x => x.id !== id),
