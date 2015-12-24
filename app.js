@@ -21,6 +21,30 @@ var testUser = new User({
   password: `Password`
 })
 
+app.use((req, res, next) => {
+  let token = req.body.token || req.query.token || req.headers['x-access-token']
+
+  if (token) {
+    jwt.verify(token, app.get(`secret`), (err, decoded) => {
+      if (err) {
+        return res.json({
+          success: false,
+          message: `Failed to authenticate token`
+        })
+      } else {
+        req.decoded = decoded
+        next()
+      }
+    })
+  } else {
+    // if there is no token return an error
+    return res.status(403).send({
+      success: false,
+      message: 'No token provided.'
+    })
+  }
+})
+
 app.get('/auth', (req, res) => {
   User.getAuthenticated(req.body.username, req.body.password, (err, user, reason) => {
     if (err) throw error
