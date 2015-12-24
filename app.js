@@ -21,22 +21,38 @@ var testUser = new User({
   password: `Password`
 })
 
-User.findOne({ username: req.body.username }, (err, user) => {
-  if (err) throw err
-  user.comparePassword(req.body.password, (err, isMatch) => {
-      if (err) throw err
-      console.log(`password: ${req.body.password} result: ${isMatch}`)
-  })
-})
-
 app.get('/auth', (req, res) => {
-  var token = jwt.sign(user, app.get('secret'), {
-    expiresInMinutes: 1440 // expires in 24 hours
-  })
-  res.json({
-    success: true,
-    message: `Enjoy your token!`,
-    token: token
+  User.getAuthenticated(req.body.username, req.body.password, (err, user, reason) => {
+    if (err) throw error
+    if (user) {
+      var token = jwt.sign(user, app.get('secret'), {
+        expiresInMinutes: 1440 // expires in 24 hours
+      })
+      res.json({
+        success: true,
+        message: `Enjoy your token!`,
+        token: token
+      })
+      return
+    }
+    var reasons = User.failedLogin
+    switch(reason) {
+      case reasons.NOT_FOUND:
+      case reasons.PASSWORD_INCORRECT:
+        // notify user that login failed
+        res.json({
+          success: false,
+          message: `Invalid Login`,
+        })
+        break;
+      case reasons.MAX_ATTEMPTS:
+        // notify user that account is temporarily locked
+        res.json({
+          success: false,
+          message: `Max attempts exceeded`,
+        })
+        break;
+    }
   })
 })
 
