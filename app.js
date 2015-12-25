@@ -287,6 +287,29 @@ io.on(`connection`, (socket) => {
 
     io.emit(`api:updateRooms`, { rooms })
   })
+
+  // pong
+
+  socket.on(`ui:movePaddle`, ({ id, mouse, username }) => {
+    let room = rooms.filter(x => x.id === id)[0]
+    let user = room.users.filter(x => x.username === username)[0]
+
+    user.mouse = mouse
+
+    console.log(user)
+
+    room.users = [
+      ...room.users.filter(x => x.username !== username),
+      user
+    ]
+
+    rooms = [
+      ...rooms.filter(x => x.id !== id),
+      room
+    ]
+
+    socket.broadcast.emit(`api:updateRooms`, { rooms })
+  })
 })
 
 http.listen(8000, () => {
