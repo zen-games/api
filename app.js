@@ -8,7 +8,7 @@ let Sentencer = require(`sentencer`)
 
 // Game Logic
 
-import ttt from './games/tictactoe'
+import ttt, { randomMove } from './games/tictactoe'
 
 let rooms = []
 let users = []
@@ -190,7 +190,7 @@ io.on(`connection`, (socket) => {
     ))
   })
 
-  socket.on(`ui:startGame`, ({ id, username }) => {
+  socket.on(`ui:startGame`, ({ ai, id, username }) => {
     let room = rooms.filter(x => x.id === id)[0]
     let user = room.users.filter(x => x.username === username)[0]
 
@@ -201,6 +201,16 @@ io.on(`connection`, (socket) => {
       user
     ]
 
+    if (ai) {
+      room.users = [
+        ...room.users,
+        {
+          username: `ai`,
+          ready: true
+        }
+      ]
+    }
+
     if (room.users.filter(x => x.ready).length === room.game.players) {
       room.game.started = true
 
@@ -208,6 +218,18 @@ io.on(`connection`, (socket) => {
         room.users[
           Math.floor(Math.random() * 2)
         ].username
+
+      if (room.game.turn === `ai`) {
+        room.game.state = [
+          ...room.game.state,
+          randomMove(
+            room.game.state[room.game.state.length - 1],
+            room.game.state.length
+          )
+        ]
+
+        room.game.turn = username
+      }
 
       room.messages = [
         ...room.messages,
@@ -240,7 +262,7 @@ io.on(`connection`, (socket) => {
 
     game.state = [
       ...game.state,
-      game.state[game.state.length -1].map((row, i) => {
+      game.state[game.state.length - 1].map((row, i) => {
         if (i === x) {
           return row.map((cell, i) => {
             if (i === y) {
@@ -278,6 +300,16 @@ io.on(`connection`, (socket) => {
     game.turn =
       room.users.filter(x => x.username !== game.turn)[0].username
 
+    if (room.game.turn === `ai`) {
+      room.game.state = [
+        ...room.game.state,
+        randomMove(room.game.state[room.game.state.length - 1])
+      ]
+
+      game.turn =
+        room.users.filter(x => x.username !== game.turn)[0].username
+    }
+
     room.game = game
 
     rooms = [
@@ -295,8 +327,6 @@ io.on(`connection`, (socket) => {
     let user = room.users.filter(x => x.username === username)[0]
 
     user.mouse = mouse
-
-    console.log(user)
 
     room.users = [
       ...room.users.filter(x => x.username !== username),

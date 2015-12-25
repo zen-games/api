@@ -27,3 +27,26 @@ export default // ([array], integer) -> boolean
      || sumVertical(matrix).some(n => Math.abs(n) === length)
     )
   }
+
+export const randomMove =
+  (matrix, length) => {
+    let choice, x, y
+    while (choice !== 0) {
+      x = Math.floor(Math.random() * 3)
+      y = Math.floor(Math.random() * 3)
+      choice = matrix[x][y]
+    }
+    return matrix.map((row, i) => {
+      if (i === x) {
+        return row.map((cell, i) => {
+          if (i === y) {
+            return length % 2 === 0 ? 1 : -1
+          } else {
+            return cell
+          }
+        })
+      } else {
+        return row
+      }
+    })
+  }
