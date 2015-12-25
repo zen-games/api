@@ -174,8 +174,8 @@ io.on(`connection`, (socket) => {
     room.game = {
       ...game,
       started: false,
-      gameOver: false,
-      turn: null
+      turn: null,
+      winner: null
     }
 
     rooms = [
@@ -268,7 +268,9 @@ io.on(`connection`, (socket) => {
         }
       ]
 
-      console.log(chalk.cyan(
+      game.winner = game.turn
+
+      console.log(chalk.yellow(
         `${game.turn} has won ${room.game.name} in room ${room.id}!`
       ))
     }
