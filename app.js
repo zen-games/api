@@ -229,7 +229,7 @@ io.on(`connection`, (socket) => {
   })
 
   socket.on(`ui:makeMove`, ({ id, x, y }) => {
-    // add move to board / make calculations
+    // TODO: check that the correct user made the move
 
     let room = rooms.filter(x => x.id === id)[0]
     let { game } = room
@@ -240,8 +240,7 @@ io.on(`connection`, (socket) => {
         if (i === x) {
           return row.map((cell, i) => {
             if (i === y) {
-              // needs to be -1 or based on turn
-              return 1
+              return game.state.length % 2 === 0 ? 1 : -1
             } else {
               return cell
             }
@@ -251,6 +250,11 @@ io.on(`connection`, (socket) => {
         }
       })
     ]
+
+    game.turn =
+      room.users.filter(x => x.username !== game.turn)[0].username
+
+    console.log(game.turn)
 
     room.game = game
 
