@@ -6,6 +6,10 @@ let io = require(`socket.io`)(http)
 let chalk = require(`chalk`)
 let Sentencer = require(`sentencer`)
 
+// Game Logic
+
+import ttt from './games/tictactoe'
+
 let rooms = []
 let users = []
 
@@ -251,10 +255,26 @@ io.on(`connection`, (socket) => {
       })
     ]
 
+    if (game.state.length > 5) {
+      ttt(game.state[game.state.length - 1], 3)
+
+      room.messages = [
+        ...room.messages,
+        {
+          id: room.id,
+          message: `${game.turn} has won!`,
+          time: +new Date(),
+          username: `zen-games`,
+        }
+      ]
+
+      console.log(chalk.cyan(
+        `${game.turn} has won ${room.game.name} in room ${room.id}!`
+      ))
+    }
+
     game.turn =
       room.users.filter(x => x.username !== game.turn)[0].username
-
-    console.log(game.turn)
 
     room.game = game
 
