@@ -29,9 +29,10 @@ export default ({
       })
     ]
 
-    if (game.state.length > 5) {
+    if (
+      game.state.length > 5 &&
       ttt(game.state[game.state.length - 1], 3)
-
+    ) {
       room.messages = [
         ...room.messages,
         {
@@ -49,17 +50,43 @@ export default ({
       ))
     }
 
-    game.turn =
-      room.users.filter(x => x.username !== game.turn)[0].username
-
-    if (room.game.turn === `ai`) {
-      room.game.state = [
-        ...room.game.state,
-        randomMove(room.game.state[room.game.state.length - 1])
-      ]
-
+    if (!game.winner) {
       game.turn =
         room.users.filter(x => x.username !== game.turn)[0].username
+
+      if (game.turn === `ai`) {
+        game.state = [
+          ...game.state,
+          randomMove(
+            game.state[game.state.length - 1],
+            game.state.length
+          )
+        ]
+
+        if (
+          game.state.length > 5 &&
+          ttt(game.state[game.state.length - 1], 3)
+        ) {
+          room.messages = [
+            ...room.messages,
+            {
+              id: room.id,
+              message: `${game.turn} has won!`,
+              time: +new Date(),
+              username: `zen-games`,
+            }
+          ]
+
+          game.winner = game.turn
+
+          console.log(chalk.yellow(
+            `${game.turn} has won ${room.game.name} in room ${room.id}!`
+          ))
+        } else {
+          game.turn =
+            room.users.filter(x => x.username !== game.turn)[0].username
+        }
+      }
     }
 
     room.game = game
