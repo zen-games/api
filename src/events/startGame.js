@@ -1,5 +1,5 @@
 import chalk from 'chalk'
-import ttt, { randomMove } from '../games/tictactoe'
+import ttt, { randomMove, perfectMove } from '../games/tictactoe'
 import { getRooms, setRooms } from '../state/rooms'
 
 export default ({
@@ -21,8 +21,9 @@ export default ({
       room.users = [
         ...room.users,
         {
-          username: `ai`,
-          ready: true
+          ready: true,
+          type: ai,
+          username: `ai`
         }
       ]
     }
@@ -38,10 +39,12 @@ export default ({
       if (room.game.turn === `ai`) {
         room.game.state = [
           ...room.game.state,
-          randomMove(
-            room.game.state[room.game.state.length - 1],
-            room.game.state.length
-          )
+          room.users.filter(x => x.username === `ai`)[0].type === `weak`
+          ? randomMove(
+              room.game.state[room.game.state.length - 1],
+              room.game.state.length
+            )
+          : perfectMove(room.game)
         ]
 
         room.game.turn = username

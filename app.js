@@ -4,7 +4,7 @@ import chalk from 'chalk'
 import express from 'express'
 import { Server } from 'http'
 import socketIO from 'socket.io'
-import socket from './socket'
+import socket from './src/socket'
 
 let app = express()
 let http = Server(app)
